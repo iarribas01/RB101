@@ -1,7 +1,7 @@
 def average(numbers)
   sum = 0
-  numbers.each {|n| sum += n}
-  sum.to_f / numbers.length.to_f
+  numbers.each { |n| sum += n }
+  sum.to_f / numbers.length
 end
 
 puts average([1, 6]) # integer division: (1 + 6) / 2 -> 3
