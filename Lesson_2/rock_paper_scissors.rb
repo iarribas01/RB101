@@ -1,13 +1,17 @@
 def display_results(player, computer)
   if player == computer
     prompt("It's a tie!")
-  elsif (player == 'rock' && computer == 'scissors') ||
-        (player == 'paper' && computer == 'rock') ||
-        (player == 'scissors') && (computer == 'paper')
+  elsif win?(player, computer)
     prompt('You won!')
   else
     prompt('You lost!')
   end
+end
+
+def win?(first, second)
+  (first == 'rock' && second == 'scissors') ||
+    (first == 'paper' && second == 'rock') ||
+    (first == 'scissors' && second == 'paper')
 end
 
 def prompt(message)
@@ -18,9 +22,10 @@ VALID_CHOICES = ['rock', 'paper', 'scissors']
 
 loop do
   prompt("Choose one: #{VALID_CHOICES.join(', ')}")
-  choice = Kernel.gets().chomp()
+  choice = ''
 
   loop do
+    choice = Kernel.gets().chomp()
     if VALID_CHOICES.include?(choice)
       break
     else
@@ -30,7 +35,7 @@ loop do
 
   computer_choice = VALID_CHOICES.sample()
 
-  prompt("You chose: #{choice} Computer chose: #{computer_choice}")
+  prompt("You chose: #{choice} || Computer chose: #{computer_choice}")
 
   display_results(choice, computer_choice)
 
