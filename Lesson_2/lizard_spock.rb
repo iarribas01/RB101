@@ -4,13 +4,24 @@ require "pry"
 # can handle differentiating spock and scissors
 # !!assumes player means 'scissors' when inputting 's'!!
 
-def display_results(player, computer)
-  if player == computer
-    prompt("It's a tie!")
-  elsif win?(player, computer)
-    prompt('You won!')
+def display_results(winner)
+  case winner
+    when 'player'
+      puts 'You won!'
+    when 'computer'
+      puts 'You lost...'
+    else
+      puts "It's a tie."
+  end
+end
+
+def get_winner(player_choice, computer_choice)
+  if player_choice == computer_choice
+    'tie'
+  elsif win?(player_choice, computer_choice)
+    'player'
   else
-    prompt('You lost!')
+    'computer'
   end
 end
 
@@ -34,7 +45,6 @@ end
 def fix_input(input, valid_choices)
     valid_choices.each do |choice|
       if choice.start_with?('s')
-        puts choice.start_with?(input[0, 2])
         return choice if choice.start_with?(input[0, 2])
       else
         return choice if choice.start_with?(input[0])
@@ -52,6 +62,9 @@ def prompt(message)
 end
 
 VALID_CHOICES = ['rock', 'paper', 'scissors', 'lizard', 'spock']
+player_score = 0
+computer_score = 0
+winner = nil
 
 loop do
   prompt("Choose one: #{VALID_CHOICES.join(', ')}")
@@ -66,17 +79,29 @@ loop do
     end
   end
 
-  input = fix_input(input, VALID_CHOICES)
-  
+  choice = fix_input(input, VALID_CHOICES)
   computer_choice = VALID_CHOICES.sample()
+  prompt("You chose: #{choice} || Computer chose: #{computer_choice}")
+  
+  winner = get_winner(choice, computer_choice)
+  
+  case winner
+    when "player"
+      player_score += 1
+    when "computer"
+      computer_score += 1
+  end
 
-  prompt("You chose: #{input} || Computer chose: #{computer_choice}")
-
-  display_results(input, computer_choice)
-
+  display_results(winner)
+  puts "Current points: Player #{player_score} || Computer #{computer_score}"
+  
+  break if player_score == 3 || computer_score == 3
+  
   prompt("Do you want to play again?")
   play_again = Kernel.gets().chomp()
+  puts
   break unless play_again.downcase().start_with?('y')
 end
 
+prompt("Looks like #{winner} is the grand winner.")
 prompt('Thank you for playing, goodbye.')
