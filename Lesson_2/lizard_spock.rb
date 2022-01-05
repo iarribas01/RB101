@@ -1,5 +1,13 @@
+# CHANGES THAT CAN BE MADE
 # !!assumes player means 'scissors' when inputting 's'!!
-# will say 'tie' is the winner
+#     ask to clarify? or let user know?
+#
+# will say 'tie' is the winner if nobody wins
+# 
+# Too much complexity in win? method, could store win solutions
+# into a hash and check hash
+#
+# Needs refactoring
 
 require "pry"
 
