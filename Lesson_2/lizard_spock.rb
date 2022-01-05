@@ -1,17 +1,16 @@
-require "pry"
-
-# Current status - exercise 2 completed
-# can handle differentiating spock and scissors
 # !!assumes player means 'scissors' when inputting 's'!!
+# will say 'tie' is the winner
+
+require "pry"
 
 def display_results(winner)
   case winner
-    when 'player'
-      puts 'You won!'
-    when 'computer'
-      puts 'You lost...'
-    else
-      puts "It's a tie."
+  when 'player'
+    puts 'You won!'
+  when 'computer'
+    puts 'You lost...'
+  else
+    puts "It's a tie."
   end
 end
 
@@ -28,33 +27,32 @@ end
 def win?(first, second)
   (first == 'rock' && second == 'lizard') ||
     (first == 'rock' && second == 'scissors') ||
-    
+
     (first == 'lizard' && second == 'paper') ||
     (first == 'lizard' && second == 'spock') ||
-    
+
     (first == 'scissors' && second == 'lizard') ||
     (first == 'scissors' && second == 'paper') ||
-    
+
     (first == 'paper' && second == 'spock') ||
     (first == 'paper' && second == 'rock') ||
-    
-    (first == 'spock' && second == 'rock')||
+
+    (first == 'spock' && second == 'rock') ||
     (first == 'spock' && second == 'scissors')
 end
 
 def fix_input(input, valid_choices)
-    valid_choices.each do |choice|
-      if choice.start_with?('s')
-        return choice if choice.start_with?(input[0, 2])
-      else
-        return choice if choice.start_with?(input[0])
-      end
+  valid_choices.each do |choice|
+    if choice.start_with?('s')
+      return choice if choice.start_with?(input[0, 2])
+    elsif choice.start_with?(input[0])
+      return choice
     end
+  end
 end
 
-
 def valid_choice?(user_input, valid_choices)
-  !valid_choices.select{|choice| user_input.start_with?(choice[0])}.empty?
+  !valid_choices.select { |choice| user_input.start_with?(choice[0]) }.empty?
 end
 
 def prompt(message)
@@ -82,21 +80,21 @@ loop do
   choice = fix_input(input, VALID_CHOICES)
   computer_choice = VALID_CHOICES.sample()
   prompt("You chose: #{choice} || Computer chose: #{computer_choice}")
-  
+
   winner = get_winner(choice, computer_choice)
-  
+
   case winner
-    when "player"
-      player_score += 1
-    when "computer"
-      computer_score += 1
+  when "player"
+    player_score += 1
+  when "computer"
+    computer_score += 1
   end
 
   display_results(winner)
   puts "Current points: Player #{player_score} || Computer #{computer_score}"
-  
+
   break if player_score == 3 || computer_score == 3
-  
+
   prompt("Do you want to play again?")
   play_again = Kernel.gets().chomp()
   puts
