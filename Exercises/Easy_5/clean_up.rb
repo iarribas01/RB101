@@ -1,22 +1,28 @@
 # need to revisit
-
-def cleanup(string)
-  new_str = ''
-  string.split.each do |word| 
-    new_str << cleanup_word(word)
-    new_str << ' '
+def cleanup(sentence)
+  new_sentence = ''
+  sentence.split.each do |word| 
+    new_sentence << clean_word(word)
+    new_sentence << ' '
   end
-  new_str
+  new_sentence
 end
 
-def cleanup_word(word)
-  new_str = ''
-  word.chars.each do |char|
+def clean_word(word)
+  new_word = ''
+  mult_spaces = false
+  word.chars do |char|
     if alphanumeric?(char)
-      new_str << char
+      mult_spaces = false
+      new_word << char
+    else
+      unless mult_spaces
+        mult_spaces = true
+        new_word << ' '
+      end
     end
   end
-  new_str
+  new_word
 end
 
 def alphanumeric?(char)
