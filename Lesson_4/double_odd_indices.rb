@@ -9,7 +9,7 @@ def double_odd_numbers(numbers)
     break if counter == numbers.size
 
     current_number = numbers[counter]
-    current_number *= 2 if current_number.odd?
+    current_number *= 2 if counter.odd?
     doubled_numbers << current_number
 
     counter += 1
@@ -17,3 +17,5 @@ def double_odd_numbers(numbers)
 
   doubled_numbers
 end
+
+p double_odd_numbers(Array(1..10))
