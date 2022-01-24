@@ -1,6 +1,7 @@
 def word_cap(string)
   # string.split.map{|word| word.capitalize}.join(' ')
   # string.split.map{|word| word[0].upcase + word[1..-1].downcase}.join(' ')
+  
 end
 
 p word_cap('four score and seven') == 'Four Score And Seven'
