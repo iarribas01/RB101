@@ -2,11 +2,12 @@
 # better ways of doing this
 
 def sequence(count, first)
-  arr = [0]
+  arr = []
+  number = first
   0.upto(count-1) do |i|
-    arr.append(arr.last + first)
+    arr << number
+    number += first
   end
-  arr.shift
   arr
 end
 
