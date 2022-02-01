@@ -1,6 +1,22 @@
-# Left off at problem 4
-# need to create an offense AI
-# sort of finished but try to refactor computer places piece method
+=begin
+
+Extensions to think about adding in the future
+
+---Minimax algorithm---
+You can build an unbeatable 
+Tic Tac Toe by utilizing the minimax algorithm.
+
+---Bigger board---
+What happens if the board is 5x5 instead of 3x3? 
+What about a 9x9 board?
+
+--More players---
+When you have a bigger board, 
+you can perhaps add more than 2 players. 
+Would it be interesting to play against 2 computers? 
+What about 2 human players against a computer?
+
+=end
 
 require 'pry'
 
@@ -53,29 +69,30 @@ def player_places_piece!(brd)
   brd[square] = PLAYER_MARKER
 end
 
-def computer_places_piece!(brd)
-  square = nil
-  
-  WINNING_LINES.each do |line|
-    square = find_at_risk_square(line, brd)
-    if square == nil
-      square = find_winning_square(line, brd)
-      if square != nil
-        break
-      end
-    else
-      break
-    end
+def place_piece!(brd, current_player)
+  if current_player == 'Computer'
+    computer_places_piece!(brd)
+  else
+    player_places_piece!(brd)
   end
-
-  if square == nil
-    square = empty_squares(brd).sample
-  end
-  brd[square] = COMPUTER_MARKER
 end
 
-def find_at_risk_square(line, brd)
-  if brd.values_at(*line).count(PLAYER_MARKER) == 2
+def computer_places_piece!(brd)
+  square = nil
+
+  WINNING_LINES.each do |line|
+    square ||= ( find_at_risk_square(line, brd, COMPUTER_MARKER) || find_at_risk_square(line, brd, PLAYER_MARKER) )
+    break if square
+  end
+
+  square = empty_squares(brd).sample if !square
+
+  brd[square] = COMPUTER_MARKER
+  display_board(brd)
+end
+
+def find_at_risk_square(line, brd, marker)
+  if brd.values_at(*line).count(marker) == 2
     brd.select{|k,v| line.include?(k) && v == ' '}.keys.first
     #
     # brd                                   # {1=>' ', 2 = 'X', 3 = 'O'...}
@@ -89,13 +106,6 @@ def find_at_risk_square(line, brd)
   end
 end
 
-def find_winning_square(line, brd)
-  if brd.values_at(*line).count(COMPUTER_MARKER) == 2
-    brd.select{|k,v| line.include?(k) && v == ' '}.keys.first
-  else
-    nil
-  end
-end
 
 def board_full?(brd)
   empty_squares(brd).empty?
@@ -133,21 +143,68 @@ def joinor(list, delimeter=', ', word='or')
   joined_str
 end
 
+def alternate_player(current_player)
+  current_player == 'Player' ? 'Computer': 'Player'
+end
+
+def loading_screen
+  system 'clear'
+  prompt "Let the game begin."
+  sleep(2)
+  system 'clear'
+  
+  3.times do
+    print "Now loading"
+    3.times do
+      sleep(0.4)
+      print('.')
+    end
+    system 'clear'
+  end
+end
+
+def who_goes_first
+  current_player = nil
+  loop do
+    prompt "Do you want to go first? (y or n)"
+    prompt "or... let the computer decide for you (c)."
+    answer = gets.chomp
+    if answer.downcase.start_with?('y')
+      current_player = 'Player'
+      break
+    elsif answer.downcase.start_with?('n')
+      current_player = 'Computer'
+      break
+    elsif answer.downcase.start_with?('c')
+      current_player = ['Player', 'Computer'].sample
+      if current_player == 'Player'
+        prompt "Computer wants YOU to go first. Very kind."
+        sleep(2)
+      else
+        prompt "Computer wants to go first."
+        sleep(2)
+      end
+      break
+    else
+      prompt "Invalid response. Must pick y or n."
+    end
+  end
+  current_player
+end
+
 player_score = 0
 computer_score = 0
+current_player = who_goes_first
+
+loading_screen
 
 loop do
   board = initialize_board
 
-  display_board(board)
-
   loop do
     display_board(board)
-
-    player_places_piece!(board)
-    break if someone_won?(board) || board_full?(board)
-
-    computer_places_piece!(board)
+    place_piece!(board, current_player)
+    current_player = alternate_player(current_player)
     break if someone_won?(board) || board_full?(board)
   end
 
@@ -163,7 +220,7 @@ loop do
     prompt "It's a tie!"
   end
   
-  puts "Score is:     Player: #{player_score}     Computer: #{computer_score}"
+  prompt "Score is:     Player: #{player_score}     Computer: #{computer_score}"
   break if player_score >= 5 || computer_score >= 5
 
   prompt "Play again? (y or n)"
