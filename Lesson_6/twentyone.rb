@@ -1,6 +1,3 @@
-# game works, needs further testing
-# and refactoring + rubocop
-
 require 'pry'
 
 NUM_STARTING_CARDS = 2
@@ -8,37 +5,12 @@ SUM_LIMIT = 21
 DEALER_MIN_LIMIT = 17
 PAUSE_TIME = 2 # seconds
 
-# P
-# Questions: 
-  # - does the suit matter?
-  # - is this two player or against the computer?
-# Setup: Player and Dealer get two cards,
-  # player can see ONE of dealer's cards
-# Win condition: either dealer or player has a hand 
-  # closest to 21 without going over
-# Lose condition: Player or dealer busts
-# Gameplay:
-  # player can hit or stay
-  # hit = draw another card, adding onto total
-  # stay = ending their turn
-  # dealer must hit until their hand is at least 17
-  # stay when hand is >=17 and <= 21
-  # compare cards at end to determine winner or tie
-# E
-
-# D - hash containing the suits and the cards within each suit
-# key = suit all strings
-# value = array of strings
-# player hand = {h => [1], s=> []}
-
-# A
-
 # returns a string of list items neatly
 # joined by commas and 'or'
 def joinor(list)
   joined_str = ''
   if list.length > 2
-    joined_str << list[0, list.length-1].join(', ')
+    joined_str << list[0, list.length - 1].join(', ')
     joined_str << ", and "
     joined_str << list[-1].to_s
   elsif list.length == 2
@@ -76,7 +48,7 @@ end
 
 # takes a random card from the deck and adds it to hand
 def draw_card!(deck, hand)
-  suit = %w(h s c d).select{|s| deck[s].length>0}.sample
+  suit = %w(h s c d).select { |s| deck[s].length > 0 }.sample
   card = deck[suit].sample
   hand[suit] << card
   remove_card!(deck, suit, card)
@@ -84,7 +56,7 @@ end
 
 # removes specified card from deck
 def remove_card!(deck, suit, card)
-  deck[suit].delete_if{|val| val == card}
+  deck[suit].delete_if { |val| val == card }
 end
 
 # draws two random cards for both the player and the dealer
@@ -96,12 +68,12 @@ def deal_cards!(deck, player, dealer)
   end
 end
 
-# returns all card values as strings, ignoring the suit
+# returns array of card values, ignoring the suit
 def card_values(hand)
   hand.values.flatten
 end
 
-# neatly prints values of  hand
+# returns string of hand
 def hand_str(hand)
   cards = card_values(hand)
   joinor(cards) + "."
@@ -144,12 +116,12 @@ end
 
 # checks a hand to find if there are any aces
 def any_ace?(hand)
-  hand.values.flatten.any? {|card| card == 'ace'}
+  card_values(hand).any? { |card| card == 'ace' }
 end
 
 # checks to see if someone's busted
 def busted?(hand)
-  to_integers(hand).sum > SUM_LIMIT
+  hand_sum(hand) > SUM_LIMIT
 end
 
 # displays one of the dealer's cards
@@ -162,66 +134,80 @@ def pick_known_card(dealer_hand)
   card_values(dealer_hand).sample
 end
 
+# checks to see if dealer has reached their
+# minimum card value that they must have
 def dealer_reached_min?(dealer_hand)
-  to_integers(dealer_hand).sum >= DEALER_MIN_LIMIT
+  hand_sum(dealer_hand) >= DEALER_MIN_LIMIT
 end
 
-def compare_cards(player_hand, dealer_hand)
-  if to_integers(player_hand).sum > to_integers(dealer_hand).sum
+# compares the values of player_hand
+def compare_hands(player_hand, dealer_hand)
+  if hand_sum(player_hand) > hand_sum(dealer_hand)
     'player'
-  elsif to_integers(dealer_hand).sum > to_integers(player_hand).sum
+  elsif hand_sum(dealer_hand) > hand_sum(player_hand)
     'dealer'
   else
     'tie'
   end
 end
 
-
-############ MAIN PROGRAM ############
-
-player_hand = initialize_hand
-dealer_hand = initialize_hand
-deck = initialize_deck
-known_card = nil
-
-deal_cards!(deck, player_hand, dealer_hand)
-
-# player_hand = {
-#   'h' => ['jack'],
-#   'c' => ['ace'],
-#   's' => ['ace'],
-#   'd' => ['jack']
-# }
-
-known_card = pick_known_card(dealer_hand)
-
-player_choice = ''
-loop do
-  system 'clear'
-  prompt "PLAYER"
-  prompt "Your cards are " + hand_str(player_hand)
-  display_dealer_hand(known_card)
-
-  prompt "Player --- pick your move: "
-  prompt "1. hit"
-  prompt "2. stay"
-
-  player_choice = gets.chomp
-  if player_choice.start_with?('2') || player_choice.downcase.start_with?('s')
-    break
-  else
-    draw_card!(deck, player_hand)
-    break if busted?(player_hand)
-  end
+# computes the sum of a hand
+def hand_sum(hand)
+  to_integers(hand).sum
 end
 
-if busted?(player_hand)
-  prompt "You busted with a value of " + to_integers(player_hand).sum.to_s
-  prompt "Dealer wins!"
-else
-  prompt "You chose to stay!"  # if player didn't bust, must have stayed to get here
-  prompt "Now it is the dealer's turn."
-  sleep(PAUSE_TIME)
+# prompts user if they want to play again, return true if yes
+def play_again?
+  prompt "Do you want to play again? (y or n)"
+  answer = gets.chomp
+  answer.downcase.start_with?('y')
+end
+
+############ MAIN PROGRAM ############
+player_score = 0
+dealer_score = 0
+
+loop do
+  player_hand = initialize_hand
+  dealer_hand = initialize_hand
+  deck = initialize_deck
+  known_card = nil
+
+  deal_cards!(deck, player_hand, dealer_hand)
+
+  known_card = pick_known_card(dealer_hand)
+
+  player_choice = ''
+
+  loop do
+    system 'clear'
+    prompt "PLAYER"
+    prompt "Your cards are " + hand_str(player_hand)
+    display_dealer_hand(known_card)
+
+    prompt "Player --- pick your move: "
+    prompt "1. hit"
+    prompt "2. stay"
+
+    player_choice = gets.chomp
+    if player_choice.start_with?('2') || player_choice.downcase.start_with?('s')
+      break
+    else
+      draw_card!(deck, player_hand)
+      break if busted?(player_hand)
+    end
+  end
+
+  if busted?(player_hand)
+    prompt "You busted with a value of " + hand_sum(player_hand).to_s
+    prompt "Dealer wins!"
+    dealer_score += 1
+    break unless play_again?
+  else
+    prompt "You chose to stay!"
+    prompt "Now it is the dealer's turn."
+    sleep(PAUSE_TIME)
+  end
 
   dealer_choice = ''
   loop do
@@ -238,7 +224,8 @@ else
       if dealer_reached_min?(dealer_hand)
         break
       else
-        prompt "You can't stay. You must have a value of at least #{DEALER_MIN_LIMIT} to stay."
+        prompt "You can't stay. You must have a value
+        of at least #{DEALER_MIN_LIMIT} to stay."
         sleep(PAUSE_TIME)
       end
     else
@@ -248,25 +235,35 @@ else
   end
 
   if busted?(dealer_hand)
-    prompt "Dealer busted with a value of " + to_integers(dealer_hand).sum.to_s
+    prompt "Dealer busted with a value of " + hand_sum(dealer_hand).to_s
     prompt "Player wins!"
+    player_score += 1
+    break unless play_again?
+  else
+    prompt "Let's compare cards now!"
   end
 
-  prompt "Let's compare cards now!"
+  prompt "Player had a total of #{hand_sum(player_hand)}"
+  prompt "Dealer had a total of #{hand_sum(dealer_hand)}"
 
-  prompt "Player had a total of #{to_integers(player_hand).sum}"
-  prompt "Dealer had a total of #{to_integers(dealer_hand).sum}"
+  winner = compare_hands(player_hand, dealer_hand)
 
-  winner = compare_cards(player_hand, dealer_hand)
-
-  if winner == 'Player'
+  if winner == 'player'
     prompt "Congrats player for winning twenty one!"
-  elsif winner == 'Dealer'
+    player_score += 1
+  elsif winner == 'dealer'
     prompt "Congrats dealer for winning twenty one!"
+    dealer_score += 1
   else
     prompt "Insane! Both player and dealer tied in the game of twenty one!"
   end
-  
+
+  sleep(PAUSE_TIME)
+
+  system 'clear'
+
+  break unless play_again?
 end
 
+prompt "Final score:\t\tPlayer: #{player_score}\tDealer: #{dealer_score}"
 prompt "Thanks for playing! Goodbye."
