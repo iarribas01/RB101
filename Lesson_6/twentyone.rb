@@ -1,9 +1,14 @@
+# LIST OF BUGS
+# player_total doesn't update after every hit
+# player_total doesn't update when drawn a facecard
+
+
 require 'pry'
 
 NUM_STARTING_CARDS = 2
 SUM_LIMIT = 21
 DEALER_MIN_LIMIT = 17
-PAUSE_TIME = 2 # seconds
+PAUSE_TIME = 5 # seconds
 
 # returns a string of list items neatly
 # joined by commas and 'or'
@@ -47,11 +52,13 @@ def initialize_hand
 end
 
 # takes a random card from the deck and adds it to hand
+# returns the card that was drawn
 def draw_card!(deck, hand)
   suit = %w(h s c d).select { |s| deck[s].length > 0 }.sample
   card = deck[suit].sample
   hand[suit] << card
   remove_card!(deck, suit, card)
+  get_value(card)
 end
 
 # removes specified card from deck
@@ -120,8 +127,8 @@ def any_ace?(hand)
 end
 
 # checks to see if someone's busted
-def busted?(hand)
-  hand_sum(hand) > SUM_LIMIT
+def busted?(total)
+  total > SUM_LIMIT
 end
 
 # displays one of the dealer's cards
@@ -136,15 +143,15 @@ end
 
 # checks to see if dealer has reached their
 # minimum card value that they must have
-def dealer_reached_min?(dealer_hand)
-  hand_sum(dealer_hand) >= DEALER_MIN_LIMIT
+def dealer_reached_min?(dealer_total)
+  dealer_total >= DEALER_MIN_LIMIT
 end
 
 # compares the values of player_hand
-def compare_hands(player_hand, dealer_hand)
-  if hand_sum(player_hand) > hand_sum(dealer_hand)
+def compare_hands(player_total, dealer_total)
+  if player_total > dealer_total
     'player'
-  elsif hand_sum(dealer_hand) > hand_sum(player_hand)
+  elsif dealer_total > player_total
     'dealer'
   else
     'tie'
@@ -163,21 +170,46 @@ def play_again?
   answer.downcase.start_with?('y')
 end
 
+def game_over(winner, player_score, dealer_score)
+  if winner == 'player'
+    prompt "Congrats player for winning twenty one!"
+    player_score += 1
+  elsif winner == 'dealer'
+    prompt "Congrats dealer for winning twenty one!"
+    dealer_score += 1
+  else
+    prompt "Insane! Both player and dealer tied in the game of twenty one!"
+  end
+  prompt "Final score:\t\tPlayer: #{player_score}\tDealer: #{dealer_score}"
+  [player_score, dealer_score]
+end
+
 ############ MAIN PROGRAM ############
 player_score = 0
 dealer_score = 0
 
 loop do
   player_hand = initialize_hand
+  # player_hand = {
+  #   'h' => ['ace'],
+  #   's' => ['ace'],
+  #   'd' => ['ace'],
+  #   'c' => ['ace']
+  # }
+
   dealer_hand = initialize_hand
+
   deck = initialize_deck
   known_card = nil
 
   deal_cards!(deck, player_hand, dealer_hand)
-
+  
+  player_total = hand_sum(player_hand)
+  dealer_total = hand_sum(dealer_hand)
+  
   known_card = pick_known_card(dealer_hand)
 
-  player_choice = ''
+  choice = ''
 
   loop do
     system 'clear'
@@ -189,27 +221,26 @@ loop do
     prompt "1. hit"
     prompt "2. stay"
 
-    player_choice = gets.chomp
-    if player_choice.start_with?('2') || player_choice.downcase.start_with?('s')
+    choice = gets.chomp
+    if choice.start_with?('2') || choice.downcase.start_with?('s')
       break
     else
-      draw_card!(deck, player_hand)
-      break if busted?(player_hand)
+      player_total += draw_card!(deck, player_hand)
+      break if busted?(player_total)
     end
   end
 
-  if busted?(player_hand)
-    prompt "You busted with a value of " + hand_sum(player_hand).to_s
-    prompt "Dealer wins!"
-    dealer_score += 1
-    break unless play_again?
-  else
-    prompt "You chose to stay!"
-    prompt "Now it is the dealer's turn."
-    sleep(PAUSE_TIME)
+
+  if busted?(player_total)
+    prompt "You busted with a value of #{player_total}"
+    player_score, dealer_score = game_over('dealer', player_score, dealer_score)
+    play_again? ? next : break
   end
 
-  dealer_choice = ''
+  prompt "You chose to stay!"
+  prompt "Now it is the dealer's turn."
+  sleep(PAUSE_TIME)
+
   loop do
     system 'clear'
     prompt "DEALER"
@@ -219,9 +250,9 @@ loop do
     prompt "1. hit"
     prompt "2. stay"
 
-    dealer_choice = gets.chomp
-    if dealer_choice.start_with?('2') || dealer_choice.downcase.start_with?('s')
-      if dealer_reached_min?(dealer_hand)
+    choice = gets.chomp
+    if choice.start_with?('2') || choice.downcase.start_with?('s')
+      if dealer_reached_min?(dealer_total)
         break
       else
         prompt "You can't stay. You must have a value
@@ -229,41 +260,36 @@ loop do
         sleep(PAUSE_TIME)
       end
     else
-      draw_card!(deck, dealer_hand)
-      break if busted?(dealer_hand)
+      dealer_total += draw_card!(deck, dealer_hand)
+      break if busted?(dealer_total)
     end
   end
 
-  if busted?(dealer_hand)
-    prompt "Dealer busted with a value of " + hand_sum(dealer_hand).to_s
-    prompt "Player wins!"
-    player_score += 1
-    break unless play_again?
+  if busted?(dealer_total)
+    prompt "Dealer busted with a value of " + dealer_total.to_s
+    player_score, dealer_score = game_over('player', player_score, dealer_score)
+    play_again? ? next : break
   else
     prompt "Let's compare cards now!"
   end
 
-  prompt "Player had a total of #{hand_sum(player_hand)}"
-  prompt "Dealer had a total of #{hand_sum(dealer_hand)}"
+  prompt "Player had a total of #{player_total}"
+  prompt "Dealer had a total of #{dealer_total}"
 
-  winner = compare_hands(player_hand, dealer_hand)
-
-  if winner == 'player'
-    prompt "Congrats player for winning twenty one!"
-    player_score += 1
-  elsif winner == 'dealer'
-    prompt "Congrats dealer for winning twenty one!"
-    dealer_score += 1
-  else
-    prompt "Insane! Both player and dealer tied in the game of twenty one!"
-  end
+  winner = compare_hands(player_total, dealer_total)
+  player_score, dealer_score = game_over(winner, player_score, dealer_score)
 
   sleep(PAUSE_TIME)
 
   system 'clear'
 
-  break unless play_again?
+  break unless play_again? || player_score < 5 || dealer_score < 5
 end
 
-prompt "Final score:\t\tPlayer: #{player_score}\tDealer: #{dealer_score}"
+if player_score >= 5
+  prompt "Player has won the game and reached 5 points. Congrats!"
+elsif dealer_score >= 5
+  prompt "Dealer has won the game and reached 5 points. Congrats!"
+end
+
 prompt "Thanks for playing! Goodbye."
