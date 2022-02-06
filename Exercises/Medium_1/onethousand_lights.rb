@@ -1,7 +1,7 @@
 # need to double check answer with other test cases
 
 
-# Given n switched (1-n)
+# Given n switches (1-n)
 # each switch is connected to one light that is off
 # first round, turn on all lights (toggle)
 # second round, toggle 2, 4, 6
@@ -59,18 +59,15 @@ def toggle_switches(lights, repetitions)
 
     index = 0
     switches.map! do |switch|
-
+      # puts (index + 1) % round 
       # toggle certain switches on if they meet criteria
-      
       if ((index + 1) % round == 0) # toggle switch if the number is a factor of the current round
-        index += 1
-        !switch
-      else
-        index += 1
-        switch
+        switch = !switch
+      end
+      index += 1
+      switch
       end
     end
-  end
 
   # extract the positions of the switches that are on
   # create empty array  
@@ -83,12 +80,10 @@ def toggle_switches(lights, repetitions)
     end
   end
 
-
-
   # return an array of positions of switches that are on
   positions
 end
 
-p toggle_switches(5, 2)
-p toggle_switches(10, 3)
+p toggle_switches(5, 5)
+p toggle_switches(10, 4)
 # c
