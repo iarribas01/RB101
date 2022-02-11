@@ -1,7 +1,3 @@
-# LIST OF BUGS
-# player_total doesn't update after every hit
-# player_total doesn't update when drawn a facecard
-
 
 require 'pry'
 
