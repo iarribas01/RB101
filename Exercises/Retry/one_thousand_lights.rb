@@ -48,14 +48,14 @@
 
 # receive number of switches
 
-def toggle_switches(lights, repetitions)
+def toggle_switches(n)
 
   # create an array the size of the number of switches
   # set all boolean values to true -> for 'on'
-  switches = [false]*lights
+  switches = [false]*n
 
   # iterate through the array number of repetitions
-  1.upto(repetitions) do |round|
+  1.upto(n) do |round|
 
     index = 0
     switches.map! do |switch|
@@ -84,6 +84,18 @@ def toggle_switches(lights, repetitions)
   positions
 end
 
-p toggle_switches(5, 5)
-p toggle_switches(10, 4)
+p toggle_switches(5)
+p toggle_switches(10)
 # c
+
+# solution alternatives
+  # use a hash
+    # {1 => true, 2 => true, 3 => true...}
+  
+
+# further exploration
+  # during each repetition, after all switches
+  # have been toggled for the parituclar round, 
+  # output which switches are turned on and which are off
+  # extract the information of which switches are turned on
+  # and which are turned off, then print out
