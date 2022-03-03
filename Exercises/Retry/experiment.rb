@@ -25,9 +25,43 @@
 # puts normalize(390) # 30
 # puts normalize(-30) # 330
 
-def matched?(str, regex)
-  !!(str =~ regex)
-end
+# def matched?(str, regex)
+#   !!(str =~ regex)
+# end
 
-puts matched?("Hello", /e/)
-puts matched?("Hello", /a/)
+# puts matched?("Hello", /e/)
+# puts matched?("Hello", /a/)
+
+# str = "Hello %{name}!"
+
+# hsh = {
+#   name: 'Mr. Rogers',
+#   occupation: 'teacher'
+# }
+
+# p format(str, hsh)
+
+
+# def method
+#   puts if false
+#     "Hello"
+#   elsif 
+#     "Hi"
+#   else 
+#     "Hey"
+#   end
+# end
+
+# method
+
+
+arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+# goal: print number, then 'LAUNCH!'
+
+
+for i in -1...arr.length
+  p arr[i+1]
+end
+puts "LAUNCH!"
+
+
