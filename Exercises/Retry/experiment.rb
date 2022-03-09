@@ -55,13 +55,18 @@
 # method
 
 
-arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-# goal: print number, then 'LAUNCH!'
+# arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+# # goal: print number, then 'LAUNCH!'
 
 
-for i in -1...arr.length
-  p arr[i+1]
-end
-puts "LAUNCH!"
+# for i in -1...arr.length
+#   p arr[i+1]
+# end
+# puts "LAUNCH!"
 
+a = ['hello']   # a points to ['hello']
+b = a[0]        # b points to ['hello']
+a = 'goodbye'   # a now points to 'goodbye'
 
+p a # 'goodbye'
+p b # ['hello']
